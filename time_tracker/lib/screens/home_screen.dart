@@ -30,18 +30,10 @@ class HomeScreen extends StatelessWidget {
             ),
             ListTile(
               leading: Icon(Icons.category, color: Colors.deepPurple),
-              title: Text('Manage Projects'),
+              title: Text('Manage Projects and Tasks'),
               onTap: () {
                 Navigator.pop(context); // This closes the drawer
-                Navigator.pushNamed(context, '/manage_projects');
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.tag, color: Colors.deepPurple),
-              title: Text('Manage Tasks'),
-              onTap: () {
-                Navigator.pop(context); // This closes the drawer
-                Navigator.pushNamed(context, '/manage_tasks');
+                Navigator.pushNamed(context, '/manage_projects_tasks');
               },
             ),
           ],
