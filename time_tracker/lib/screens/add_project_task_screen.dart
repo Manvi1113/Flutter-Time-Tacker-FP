@@ -75,7 +75,7 @@ class _AddProjectTaskScreenState extends State<AddProjectTaskScreen> {
                   // Add task
                   if (taskName.isNotEmpty) {
                     Provider.of<ProjectTaskProvider>(context, listen: false)
-                        .addTask(Task(
+                        .updateTask(Task(
                       id: DateTime.now().toString(), // Simple ID generation
                       name: taskName,
                       description: taskDescription, // Assuming Task has description

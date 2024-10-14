@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/time_entry.dart';
+import '../models/time_entry.dart'; // Ensure this model is defined
 import '../providers/time_entry_provider.dart';
 
-class AddTimeEntryScreen extends StatefulWidget {
-  @override
-  _AddTimeEntryScreenState createState() => _AddTimeEntryScreenState();
-}
-
-class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
-  final _formKey = GlobalKey<FormState>();
-  String projectId = '';
-  String taskId = '';
-  double totalTime = 0.0;
-  DateTime date = DateTime.now();
-  String notes = '';
+class AddTimeEntryScreen extends StatelessWidget {
+  final TextEditingController projectIdController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
+  final TextEditingController totalTimeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -22,87 +14,48 @@ class _AddTimeEntryScreenState extends State<AddTimeEntryScreen> {
       appBar: AppBar(
         title: Text('Add Time Entry'),
       ),
-      body: Form(
-        key: _formKey,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-            children: <Widget>[
-            DropdownButtonFormField<String>(
-                value: projectId,
-                onChanged: (String? newValue) {
-                setState(() {
-                    projectId = newValue!;
-                });
-                },
-                decoration: InputDecoration(labelText: 'Project'),
-                items: <String>['Project 1', 'Project 2', 'Project 3'] // Dummy project names
-                    .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                );
-                }).toList(),
+          children: [
+            TextField(
+              controller: projectIdController,
+              decoration: InputDecoration(labelText: 'Project ID'),
             ),
-            DropdownButtonFormField<String>(
-                value: taskId,
-                onChanged: (String? newValue) {
-                setState(() {
-                    taskId = newValue!;
-                });
-                },
-                decoration: InputDecoration(labelText: 'Task'),
-                items: <String>['Task 1', 'Task 2', 'Task 3'] // Dummy task names
-                    .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                );
-                }).toList(),
+            TextField(
+              controller: notesController,
+              decoration: InputDecoration(labelText: 'Notes'),
             ),
-            TextFormField(
-                decoration: InputDecoration(labelText: 'Total Time (hours)'),
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                validator: (value) {
-                if (value == null || value.isEmpty) {
-                    return 'Please enter total time';
-                }
-                if (double.tryParse(value) == null) {
-                    return 'Please enter a valid number';
-                }
-                return null;
-                },
-                onSaved: (value) => totalTime = double.parse(value!),
+            TextField(
+              controller: totalTimeController,
+              decoration: InputDecoration(labelText: 'Total Time (hours)'),
+              keyboardType: TextInputType.number,
             ),
-            TextFormField(
-                decoration: InputDecoration(labelText: 'Notes'),
-                validator: (value) {
-                if (value == null || value.isEmpty) {
-                    return 'Please enter some notes';
-                }
-                return null;
-                },
-                onSaved: (value) => notes = value!,
-            ),
+            SizedBox(height: 20),
             ElevatedButton(
-                onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    Provider.of<TimeEntryProvider>(context, listen: false)
-                        .addTimeEntry(TimeEntry(
-                        id: DateTime.now().toString(), // Simple ID generation
-                        projectId: projectId,
-                        taskId: taskId,
-                        totalTime: totalTime,
-                        date: date,
-                        notes: notes,
-                        ));
-                    Navigator.pop(context);
+              onPressed: () {
+                final String projectId = projectIdController.text;
+                final String notes = notesController.text;
+                final double totalTime = double.tryParse(totalTimeController.text) ?? 0.0;
+
+                if (projectId.isNotEmpty && notes.isNotEmpty && totalTime > 0) {
+                  final newEntry = TimeEntry(
+                    id: DateTime.now().toString(), // Generate a unique ID
+                    projectId: projectId,
+                    notes: notes,
+                    totalTime: totalTime,
+                    date: DateTime.now(),
+                  );
+
+                  Provider.of<TimeEntryProvider>(context, listen: false).addTimeEntry(newEntry);
+                  Navigator.pop(context); // Go back after adding the entry
                 }
-                },
-                child: Text('Save'),
-            )
-            ],
+              },
+              child: Text('Add Entry'),
+            ),
+          ],
         ),
-        ),
+      ),
     );
   }
 }

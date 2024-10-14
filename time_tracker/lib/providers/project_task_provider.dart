@@ -76,6 +76,13 @@ class ProjectTaskProvider with ChangeNotifier {
     _saveTasksToStorage();
     notifyListeners();
   }
+  // Add this method to your ProjectTaskProvider
+void deleteTask(String id) {
+  _tasks.removeWhere((task) => task.id == id);
+  _saveTasksToStorage(); // Ensure you save the updated list to storage
+  notifyListeners(); // Notify listeners to update UI
+}
+
 
   // Update an existing project
   void updateProject(Project updatedProject) {
@@ -96,4 +103,17 @@ class ProjectTaskProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+  void addOrUpdateTask(Task newTask) {
+  int index = _tasks.indexWhere((task) => task.id == newTask.id);
+  if (index != -1) {
+    // Update existing task
+    _tasks[index] = newTask;
+  } else {
+    // Add new task
+    _tasks.add(newTask);
+  }
+  _saveTasksToStorage(); // Save to local storage
+  notifyListeners(); // Notify listeners to update UI
+}
+
 }

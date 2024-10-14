@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'providers/project_task_provider.dart'; // Adjusting to include your provider
 import 'providers/time_entry_provider.dart'; // Adjusting to include your provider
-import 'screens/add_time_entry_screen.dart'; // Adjusting to include your screens
+import 'screens/add_time_entry_screen.dart'; // Ensure this screen is defined correctly
 import 'screens/home_screen.dart';
 import 'screens/project_task_management_screen.dart';
 
@@ -27,13 +27,13 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TimeEntryProvider(localStorage)),
       ],
       child: MaterialApp(
-        title: 'Time Tracker', // Change the title to match your app
+        title: 'Time Tracker',
         debugShowCheckedModeBanner: false,
         initialRoute: '/',
         routes: {
           '/': (context) => HomeScreen(), // Main entry point, HomeScreen
           '/manage_projects_tasks': (context) => ProjectTaskManagementScreen(), // Route for managing projects and tasks
-          '/add_time_entry': (context) => AddTimeEntryScreen(), // Route for adding time entries
+          '/add_time_entry': (context) => AddTimeEntryScreen(), // Ensure this class is defined
         },
       ),
     );

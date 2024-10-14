@@ -1,38 +1,35 @@
 class TimeEntry {
-  final String id;
-  final String projectId;
-  final String taskId;
-  final double totalTime;
-  final DateTime date;
-  final String notes;
+  final String id;          // Unique identifier
+  final String projectId;  // ID of the project this entry relates to
+  final String notes;      // Notes about the time entry
+  final double totalTime;   // Total time spent
+  final DateTime date;      // Date of the entry
+
   TimeEntry({
     required this.id,
     required this.projectId,
-    required this.taskId,
+    required this.notes,
     required this.totalTime,
     required this.date,
-    required this.notes,
   });
-  // Converts a JSON map to a TimeEntry instance
+
   factory TimeEntry.fromJson(Map<String, dynamic> json) {
     return TimeEntry(
       id: json['id'],
       projectId: json['projectId'],
-      taskId: json['taskId'],
-      totalTime: json['totalTime'].toDouble(),
-      date: DateTime.parse(json['date']),
       notes: json['notes'],
+      totalTime: json['totalTime'],
+      date: DateTime.parse(json['date']),
     );
   }
-  // Converts a TimeEntry instance to a JSON map
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'projectId': projectId,
-      'taskId': taskId,
+      'notes': notes,
       'totalTime': totalTime,
       'date': date.toIso8601String(),
-      'notes': notes,
     };
   }
 }
