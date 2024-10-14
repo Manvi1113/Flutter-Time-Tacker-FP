@@ -19,6 +19,34 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
+        drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.deepPurple),
+              child: Text('Menu',
+                  style: TextStyle(color: Colors.white, fontSize: 24)),
+            ),
+            ListTile(
+              leading: Icon(Icons.category, color: Colors.deepPurple),
+              title: Text('Manage Projects'),
+              onTap: () {
+                Navigator.pop(context); // This closes the drawer
+                Navigator.pushNamed(context, '/manage_projects');
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.tag, color: Colors.deepPurple),
+              title: Text('Manage Tasks'),
+              onTap: () {
+                Navigator.pop(context); // This closes the drawer
+                Navigator.pushNamed(context, '/manage_tasks');
+              },
+            ),
+          ],
+        ),
+      ),
         body: TabBarView(
           children: [
             // The first tab: List of all entries
