@@ -20,25 +20,25 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.deepPurple),
-              child: Text('Menu',
-                  style: TextStyle(color: Colors.white, fontSize: 24)),
-            ),
-            ListTile(
-              leading: Icon(Icons.category, color: Colors.deepPurple),
-              title: Text('Manage Projects and Tasks'),
-              onTap: () {
-                Navigator.pop(context); // This closes the drawer
-                Navigator.pushNamed(context, '/manage_projects_tasks');
-              },
-            ),
-          ],
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: <Widget>[
+              DrawerHeader(
+                decoration: BoxDecoration(color: Colors.deepPurple),
+                child: Text('Menu',
+                    style: TextStyle(color: Colors.white, fontSize: 24)),
+              ),
+              ListTile(
+                leading: Icon(Icons.category, color: Colors.deepPurple),
+                title: Text('Manage Projects and Tasks'),
+                onTap: () {
+                  Navigator.pop(context); // This closes the drawer
+                  Navigator.pushNamed(context, '/manage_projects_tasks');
+                },
+              ),
+            ],
+          ),
         ),
-      ),
         body: TabBarView(
           children: [
             // The first tab: List of all entries
@@ -48,18 +48,37 @@ class HomeScreen extends StatelessWidget {
                   itemCount: provider.entries.length,
                   itemBuilder: (context, index) {
                     final entry = provider.entries[index];
-                    return ListTile(
-                      title: Text('${entry.projectId} - ${entry.totalTime} hours'),
-                      subtitle: Text(
-                        '${entry.date.toString()} - Notes: ${entry.notes}',
-                      ),
-                      onTap: () {
+
+                    return Dismissible(
+                      key: Key(entry.id),
+                      direction: DismissDirection.endToStart,
+                      onDismissed: (direction) {
+                        // Remove the time entry from the provider
+                        provider.deleteTimeEntry(entry.id);
+                        // Show a snackbar to inform the user
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Tapped on: ${entry.notes}'),
-                          ),
+                          SnackBar(content: Text("Time entry removed")),
                         );
                       },
+                      background: Container(
+                        color: Colors.red,
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        alignment: Alignment.centerRight,
+                        child: Icon(Icons.delete, color: Colors.white),
+                      ),
+                      child: ListTile(
+                        title: Text('${entry.projectId} - ${entry.totalTime} hours'),
+                        subtitle: Text(
+                          '${entry.date.toString()} - Notes: ${entry.notes}',
+                        ),
+                        onTap: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Tapped on: ${entry.notes}'),
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -86,24 +105,62 @@ class HomeScreen extends StatelessWidget {
 
                     return Card(
                       margin: EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text('$projectId - Total Time: $totalTime hours'),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: entries
-                              .map((entry) => Text(
-                                    '${entry.date.toString()} - Notes: ${entry.notes}',
-                                    style: TextStyle(fontSize: 12),
-                                  ))
-                              .toList(),
-                        ),
-                        onTap: () {
+                      child: Dismissible(
+                        key: Key(projectId), // Use projectId as the key
+                        direction: DismissDirection.endToStart,
+                        onDismissed: (direction) {
+                          // Remove all entries related to the project
+                          for (var entry in entries) {
+                            provider.deleteTimeEntry(entry.id);
+                          }
+                          // Show a snackbar to inform the user
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Tapped on project: $projectId'),
-                            ),
+                            SnackBar(content: Text("Project and its entries removed")),
                           );
                         },
+                        background: Container(
+                          color: Colors.red,
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          alignment: Alignment.centerRight,
+                          child: Icon(Icons.delete, color: Colors.white),
+                        ),
+                        child: ListTile(
+                          title: Text('$projectId - Total Time: $totalTime hours'),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: entries
+                                .map((entry) => Dismissible(
+                                      key: Key(entry.id),
+                                      direction: DismissDirection.endToStart,
+                                      onDismissed: (direction) {
+                                        // Remove the time entry from the provider
+                                        provider.deleteTimeEntry(entry.id);
+                                        // Show a snackbar to inform the user
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text("Time entry removed")),
+                                        );
+                                      },
+                                      background: Container(
+                                        color: Colors.red,
+                                        padding: EdgeInsets.symmetric(horizontal: 20),
+                                        alignment: Alignment.centerRight,
+                                        child: Icon(Icons.delete, color: Colors.white),
+                                      ),
+                                      child: Text(
+                                        '${entry.date.toString()} - Notes: ${entry.notes}',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Tapped on project: $projectId'),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     );
                   },
