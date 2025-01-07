@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/task.dart'; // Import your Task model
-import '../providers/time_entry_provider.dart'; // Import your TimeEntryProvider
-import '../widgets/add_task_dialog.dart'; // Import the AddTaskDialog
+import '../providers/time_entry_provider.dart';
+import '../widgets/add_task_dialog.dart';
+import '../models/task.dart';
 
 class TaskManagementScreen extends StatelessWidget {
   @override
@@ -10,7 +10,7 @@ class TaskManagementScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Manage Tasks"),
-        backgroundColor: Colors.deepPurple, // Themed color
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
       body: Consumer<TimeEntryProvider>(
@@ -24,27 +24,7 @@ class TaskManagementScreen extends StatelessWidget {
                 trailing: IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    // Optionally, show a confirmation dialog before deletion
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Confirm Deletion'),
-                        content: Text('Are you sure you want to delete this task?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(), // Close the dialog
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              provider.deleteTask(task.id); // Call the provider to delete
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                            child: Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
+                    provider.removeTask(task.id);
                   },
                 ),
               );
@@ -53,20 +33,18 @@ class TaskManagementScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
+        onPressed: () async {
+          final taskName = await showDialog<String>(
             context: context,
-            builder: (context) => AddTaskDialog(
-              onAdd: (newTask) {
-                Provider.of<TimeEntryProvider>(context, listen: false)
-                    .addOrUpdateTask(newTask); // Call provider to add task
-                Navigator.pop(context); // Close the dialog
-              },
-            ),
+            builder: (context) => AddTaskDialog(),
           );
+          if (taskName != null && taskName.isNotEmpty) {
+            final newTask = Task(id: DateTime.now().toString(), name: taskName);
+            Provider.of<TimeEntryProvider>(context, listen: false).addTask(newTask);
+          }
         },
-        tooltip: 'Add New Task',
         child: Icon(Icons.add),
+        tooltip: 'Add Task',
       ),
     );
   }

@@ -1,50 +1,129 @@
-import 'package:flutter/foundation.dart';
-import '../models/time_entry.dart';
-import 'package:localstorage/localstorage.dart';
 import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
+
+import '../models/project.dart';
+import '../models/task.dart';
+import '../models/time_entry.dart';
+
 class TimeEntryProvider with ChangeNotifier {
   final LocalStorage storage;
-  List<TimeEntry> _entries = [];
-  List<TimeEntry> get entries => _entries;
+  List<TimeEntry> _timeEntries = [];
+  List<Project> _projects = [];
+  List<Task> _tasks = [];
+
+  List<TimeEntry> get timeEntries => _timeEntries;
+  List<Project> get projects => _projects;
+  List<Task> get tasks => _tasks;
+
   TimeEntryProvider(this.storage) {
-    _loadEntriesFromStorage();
+    _loadDataFromStorage();
+    _initializeDefaults(); // Add default projects and tasks on initialization
   }
-  void _loadEntriesFromStorage() async {
-    var storedEntries = storage.getItem('time_entries');
-    if (storedEntries != null) {
-      _entries = List<TimeEntry>.from(
-        (storedEntries as List).map((item) => TimeEntry.fromJson(item)),
+
+  void _loadDataFromStorage() async {
+    var storedTimeEntries = await storage.getItem('timeEntries');
+    var storedProjects = await storage.getItem('projects');
+    var storedTasks = await storage.getItem('tasks');
+
+    if (storedTimeEntries != null) {
+      _timeEntries = List<TimeEntry>.from(
+        (jsonDecode(storedTimeEntries) as List)
+            .map((item) => TimeEntry.fromJson(item)),
       );
-      notifyListeners();
     }
-  }
-  // Add a time entry
-  void addTimeEntry(TimeEntry entry) {
-    _entries.add(entry);
-    _saveEntriesToStorage();
-    notifyListeners();
-  }
-  void _saveEntriesToStorage() {
-    storage.setItem(
-        'time_entries', jsonEncode(_entries.map((e) => e.toJson()).toList()));
-  }
-  // Delete a time entry
-  void deleteTimeEntry(String id) {
-    _entries.removeWhere((entry) => entry.id == id);
-    _saveEntriesToStorage(); // Save the updated list to local storage
-    notifyListeners();
-  }
-  // Add or update a time entry
-  void addOrUpdateTimeEntry(TimeEntry entry) {
-    int index = _entries.indexWhere((e) => e.id == entry.id);
-    if (index != -1) {
-      // Update existing entry
-      _entries[index] = entry;
-    } else {
-      // Add new entry
-      _entries.add(entry);
+
+    if (storedProjects != null) {
+      _projects = List<Project>.from(
+        (jsonDecode(storedProjects) as List)
+            .map((item) => Project.fromJson(item)),
+      );
     }
-    _saveEntriesToStorage(); // Save the updated list to local storage
+
+    if (storedTasks != null) {
+      _tasks = List<Task>.from(
+        (jsonDecode(storedTasks) as List).map((item) => Task.fromJson(item)),
+      );
+    }
+
     notifyListeners();
+  }
+
+  void _initializeDefaults() {
+    // Add default projects if none exist
+    if (_projects.isEmpty) {
+      _projects = [
+        Project(id: '1', name: 'Project Alpha'),
+        Project(id: '2', name: 'Project Beta'),
+        Project(id: '3', name: 'Project Gamma'),
+      ];
+      print('Default projects added');
+    }
+
+    // Add default tasks if none exist
+    if (_tasks.isEmpty) {
+      _tasks = [
+        Task(id: '1', name: 'Task A'),
+        Task(id: '2', name: 'Task B'),
+        Task(id: '3', name: 'Task C'),
+      ];
+      print('Default tasks added');
+    }
+
+    // Save defaults to local storage if necessary
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void addTimeEntry(TimeEntry timeEntry) {
+    _timeEntries.add(timeEntry);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void removeTimeEntry(String id) {
+    _timeEntries.removeWhere((timeEntry) => timeEntry.id == id);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void addProject(Project project) {
+    _projects.add(project);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void removeProject(String id) {
+    _projects.removeWhere((project) => project.id == id);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void addTask(Task task) {
+    _tasks.add(task);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void removeTask(String id) {
+    _tasks.removeWhere((task) => task.id == id);
+    _saveDataToStorage();
+    notifyListeners();
+  }
+
+  void _saveDataToStorage() {
+    final timeEntriesJson =
+        jsonEncode(_timeEntries.map((e) => e.toJson()).toList());
+    final projectsJson = jsonEncode(_projects.map((e) => e.toJson()).toList());
+    final tasksJson = jsonEncode(_tasks.map((e) => e.toJson()).toList());
+
+    print('Saving Time Entries: $timeEntriesJson');
+    print('Saving Projects: $projectsJson');
+    print('Saving Tasks: $tasksJson');
+
+    storage.setItem('timeEntries', timeEntriesJson);
+    storage.setItem('projects', projectsJson);
+    storage.setItem('tasks', tasksJson);
   }
 }

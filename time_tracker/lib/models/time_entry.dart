@@ -1,25 +1,29 @@
+// file: lib/models/time_entry.dart
 class TimeEntry {
-  final String id;          // Unique identifier
-  final String projectId;  // ID of the project this entry relates to
-  final String notes;      // Notes about the time entry
-  final double totalTime;   // Total time spent
-  final DateTime date;      // Date of the entry
+  final String id;
+  final String projectId;
+  final String taskId;
+  final double totalTime;
+  final DateTime date;
+  final String note;
 
   TimeEntry({
     required this.id,
     required this.projectId,
-    required this.notes,
+    required this.taskId,
     required this.totalTime,
     required this.date,
+    required this.note,
   });
 
   factory TimeEntry.fromJson(Map<String, dynamic> json) {
     return TimeEntry(
       id: json['id'],
       projectId: json['projectId'],
-      notes: json['notes'],
+      taskId: json['taskId'],
       totalTime: json['totalTime'],
       date: DateTime.parse(json['date']),
+      note: json['note'],
     );
   }
 
@@ -27,9 +31,10 @@ class TimeEntry {
     return {
       'id': id,
       'projectId': projectId,
-      'notes': notes,
+      'taskId': taskId,
       'totalTime': totalTime,
       'date': date.toIso8601String(),
+      'note': note,
     };
   }
 }

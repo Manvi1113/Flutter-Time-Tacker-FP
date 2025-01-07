@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../models/project.dart'; // Import your Project model
-import '../providers/time_entry_provider.dart'; // Import your TimeEntryProvider
-import '../widgets/add_project_dialog.dart'; // Import the AddProjectDialog
+import '../providers/time_entry_provider.dart';
+import '../widgets/add_project_dialog.dart';
+import '../models/project.dart';
 
 class ProjectManagementScreen extends StatelessWidget {
   @override
@@ -10,7 +10,7 @@ class ProjectManagementScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Manage Projects"),
-        backgroundColor: Colors.deepPurple, // Themed color
+        backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
       ),
       body: Consumer<TimeEntryProvider>(
@@ -24,27 +24,7 @@ class ProjectManagementScreen extends StatelessWidget {
                 trailing: IconButton(
                   icon: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
-                    // Optionally, show a confirmation dialog before deletion
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Confirm Deletion'),
-                        content: Text('Are you sure you want to delete this project?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(context).pop(), // Close the dialog
-                            child: Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              provider.deleteProject(project.id); // Call the provider to delete
-                              Navigator.of(context).pop(); // Close the dialog
-                            },
-                            child: Text('Delete'),
-                          ),
-                        ],
-                      ),
-                    );
+                    provider.removeProject(project.id);
                   },
                 ),
               );
@@ -53,20 +33,18 @@ class ProjectManagementScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          showDialog(
+        onPressed: () async {
+          final projectName = await showDialog<String>(
             context: context,
-            builder: (context) => AddProjectDialog(
-              onAdd: (newProject) {
-                Provider.of<TimeEntryProvider>(context, listen: false)
-                    .addOrUpdateProject(newProject); // Call provider to add project
-                Navigator.pop(context); // Close the dialog
-              },
-            ),
+            builder: (context) => AddProjectDialog(),
           );
+          if (projectName != null && projectName.isNotEmpty) {
+            final newProject = Project(id: DateTime.now().toString(), name: projectName);
+            Provider.of<TimeEntryProvider>(context, listen: false).addProject(newProject);
+          }
         },
-        tooltip: 'Add New Project',
         child: Icon(Icons.add),
+        tooltip: 'Add Project',
       ),
     );
   }
